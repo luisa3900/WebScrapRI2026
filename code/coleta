@@ -1,22 +1,38 @@
-import requests
 from bs4 import BeautifulSoup
+import requests
 
-headers = {'User-Agent': 'Mozilla/5.0'}
-session = requests.Session()
+url = 'https://en.wikipedia.org/wiki/List_of_largest_companies_in_the_United_States_by_revenue'
 
-url = 'https://example.com/products?page=1'
-response = session.get(url, headers=headers, timeout=10)
-response.raise_for_status()
+page = requests.get (url)
 
-soup = BeautifulSoup(response.text, 'lxml')
-items = soup.select('div.product-item')
+print(page)
 
-data = []
-for item in items:
-    name = item.select_one('h2.name').text.strip()
-    price = float(item.select_one('span.price').text.replace('$', ''))
-    data.append({'name': name, 'price': price})
-  
-import json
-with open('products.json', 'w') as f:
-    json.dump(data, f, indent=2)
+soup = BeautifulSoup(page.text, "html")
+
+soup.find_all("table")
+
+table = soup.find_all("table")[1]
+
+headings = table.find_all("th")
+
+headings_titles = [title.text.strip() for title in headings]
+
+headings_titles
+
+#EXTRAÇÃO DO TXT
+import pandas as pd
+
+df = pd.DataFrame(columns = headings_titles)
+
+df
+
+column_data = table.find_all("tr")
+
+for row in column_data[1:]:
+    row_data = row.find_all('td')
+    each_row_data =[data.text.strip() for data in row_data]
+    df = df.append(pd.Series(each_row_data, index=df.columns), ignore_index=True)
+
+df
+
+df.to_csv(r"path\filename", index = false)
